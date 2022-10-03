@@ -63,7 +63,7 @@ public class QueueOpdracht implements Queue {
     @Override
     public boolean equals(Queue q) {
         if (this == q) return true;
-        if (!(q instanceof week4les3_2 that)) return false;
+        if (!(q instanceof QueueOpdracht that)) return false;
         return Objects.equals(Queue, that.Queue);
     }
 
