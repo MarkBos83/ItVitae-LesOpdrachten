@@ -24,6 +24,10 @@ public class VierOpEenRij {
             spelbord = Geel(input, SpelbordPrint(spelbord), cancel);
             turns--;
         } while (turns != 0 && !cancel.shouldCancel);
+        if(turns==0){
+            SpelbordPrint(spelbord);
+            System.out.println("GELIJKSPEL!");
+        }
     }
 
     static ArrayList<String> Geel(Scanner input, ArrayList<String> spelbord, CancelIndicator cancel) {
@@ -40,6 +44,20 @@ public class VierOpEenRij {
             beurt2 = beurt3[0];
             if (beurt2 != 'a' && beurt2 != 'b' && beurt2 != 'c' && beurt2 != 'd' && beurt2 != 'e' && beurt2 != 'f' && beurt2 != 'g') {
                 System.out.println("Verkeerde input, probeer het opnieuw.");
+            }
+            int i = switch (beurt2) {
+                case 'a' -> 1;
+                case 'b' -> 3;
+                case 'c' -> 5;
+                case 'd' -> 7;
+                case 'e' -> 9;
+                case 'f' -> 11;
+                case 'g' -> 13;
+                default -> 0;
+            };
+            if(spelbord.get(i).equals("G")||spelbord.get(i).equals("R")){
+                System.out.println("Kolom is al vol, probeer opnieuw.");
+                beurt2 = 'p';
             }
         } while (beurt2 != 'a' && beurt2 != 'b' && beurt2 != 'c' && beurt2 != 'd' && beurt2 != 'e' && beurt2 != 'f' && beurt2 != 'g');
         return Beurt("G", spelbord, beurt, cancel);
