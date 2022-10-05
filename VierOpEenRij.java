@@ -8,6 +8,13 @@ public class VierOpEenRij {
         Scanner input = new Scanner(System.in);
         int turns = 42;
         Spelbord(spelbord);
+        int min = 0;
+        int max = 1;
+        int random_int = (int)Math.floor(Math.random()*(max-min+1)+min);
+        if(random_int==1){
+            spelbord = Geel(input, SpelbordPrint(spelbord), cancel);
+            turns--;
+        }
         do {
             spelbord = Rood(input, SpelbordPrint(spelbord), cancel);
             turns--;
