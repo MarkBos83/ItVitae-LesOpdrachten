@@ -142,7 +142,7 @@ public class Ganzenbord {
         if (gans.positie + gedobbeld > 63) {
             teHoog(gans, dobbel1, dobbel2);
         } else {
-            if (!bezet(gans, plek)) {
+            if (nietBezet(gans, plek)) {
                 gans.positie += gedobbeld;
                 Vakjes.uitvoeren(gans, dobbel1, dobbel2);
             }
@@ -163,7 +163,7 @@ public class Ganzenbord {
         System.out.println("je hebt te hoog gegooid, je gaat de teveel gegooide ogen terug vanaf de finish");
         gans.terug = true;
         int plek = 63 - ((gans.positie + dobbel1 + dobbel2) - 63);
-        if (!bezet(gans, plek)) {
+        if (nietBezet(gans, plek)) {
             gans.positie = plek;
             Vakjes.uitvoeren(gans, dobbel1, dobbel2);
         }
@@ -172,7 +172,7 @@ public class Ganzenbord {
     /*
     met deze methode word er gecheckt of het vakje al bezet is
      */
-    static boolean bezet(Gans gans, int plek) {
+    static boolean nietBezet(Gans gans, int plek) {
         boolean bezet = false;
         for (Gans value : ganzen) {
             if (plek == value.positie) {
@@ -185,7 +185,7 @@ public class Ganzenbord {
                 break;
             }
         }
-        return bezet;
+        return !bezet;
     }
 
     /*
@@ -256,8 +256,9 @@ class Vakjes {
             case 9 -> speciaal.eersteWorpVakje9(gans, dobbel1, dobbel2);
             case 6 -> speciaal.brug(gans);
             case 19 -> speciaal.herberg(gans);
-            case 31, 52 -> speciaal.gevangenisput(gans);
+            case 31 -> speciaal.put(gans);
             case 42 -> speciaal.doornstruik(gans);
+            case 52 -> speciaal.gevangenis(gans);
             case 58 -> speciaal.dood(gans);
             case 63 -> speciaal.Finish(gans);
             case 5, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59 -> speciaal.gans(gans, dobbel1, dobbel2);
@@ -287,7 +288,7 @@ class SpeciaalVakjes {
         } else {
             System.out.println(gans.positie + ", een gans, ga nogmaals het aantal gegooide ogen terug");
             int plek = gans.positie - dobbel1 - dobbel2;
-            if (!Ganzenbord.bezet(gans, plek)) {
+            if (Ganzenbord.nietBezet(gans, plek)) {
                 gans.positie -= (dobbel1 + dobbel2);
                 Vakjes.uitvoeren(gans, dobbel1, dobbel2);
             }
@@ -298,7 +299,7 @@ class SpeciaalVakjes {
     void brug(Gans gans) {
         System.out.println(gans.positie + ", een brug! ga verder naar 12");
         int plek = 12;
-        if (!Ganzenbord.bezet(gans, plek)) {
+        if (Ganzenbord.nietBezet(gans, plek)) {
             gans.positie = 12;
         }
     }
@@ -347,20 +348,11 @@ class SpeciaalVakjes {
         posities.clear();
     }
 
-    //roeps gevangenis of put aan
-    void gevangenisput(Gans gans) {
-        if (gans.positie == 31) {
-            put(gans);
-        } else {
-            gevangenis(gans);
-        }
-    }
-
     //terug naar 37
     void doornstruik(Gans gans) {
         System.out.println(gans.positie + ", AAAAHH!! doornstruik! ga terug naar 37");
         int plek = 37;
-        if (!Ganzenbord.bezet(gans, plek)) {
+        if (Ganzenbord.nietBezet(gans, plek)) {
             gans.positie = 37;
         }
     }
@@ -376,14 +368,14 @@ class SpeciaalVakjes {
         if (gans.eerstebeurt) {
             if (dobbel1 == 5 && dobbel2 == 4 || dobbel1 == 4 && dobbel2 == 5) {
                 int plek = 53;
-                if (!Ganzenbord.bezet(gans, plek)) {
+                if (Ganzenbord.nietBezet(gans, plek)) {
                     System.out.println("je hebt 5 en 4 gegooid, je mag direct door naar 53");
                     gans.positie = 53;
                 }
             } else if (dobbel1 == 6 && dobbel2 == 3 || dobbel1 == 3 && dobbel2 == 6) {
                 int plek = 26;
-                if (!Ganzenbord.bezet(gans, plek)) {
-                    System.out.println("je hebt 6 en 3 gegooid, je mag direct door naar 226");
+                if (Ganzenbord.nietBezet(gans, plek)) {
+                    System.out.println("je hebt 6 en 3 gegooid, je mag direct door naar 26");
                     gans.positie = 26;
                 }
             }
