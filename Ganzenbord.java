@@ -16,7 +16,6 @@ public class Ganzenbord {
             for (int i = 0; i < aantalspelers; i++) {
                 if (!ganzen.get(i).beurtOverslaan && !ganzen.get(i).gevangen && !ganzen.get(i).gevallen) {
                     beurt(ganzen.get(i));
-                    gevangenisOfPut();
                 } else {
                     System.out.println("\n" + ganzen.get(i).getKleur() + " moet deze beurt overslaan\n");
                     ganzen.get(i).beurtOverslaan = false;
@@ -138,8 +137,11 @@ public class Ganzenbord {
         int dobbel2 = dob2.Gooien();
         int gedobbeld = dobbel1 + dobbel2;
         int plek = gans.positie + dobbel1 + dobbel2;
+        if(SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)){
+            gevangenisOfPut(plek);
+        }
         System.out.println("Je hebt " + dobbel1 + " en " + dobbel2 + " gegooid (samen " + gedobbeld + ")");
-        if (gans.positie + gedobbeld > 63) {
+        if (plek > 63) {
             teHoog(gans, dobbel1, dobbel2);
         } else {
             if (nietBezet(gans, plek)) {
@@ -192,12 +194,13 @@ public class Ganzenbord {
     als iemand in de gevangenis of put zit, word met deze methode gecheckt of die speler er al uit mag of niet
     (of hij al is gepasseerd)
      */
-    static void gevangenisOfPut() {
+    static void gevangenisOfPut(int plek) {
         for (Gans gans : ganzen) {
             if (gans.positie == 52) {
                 for (Gans j : SpeciaalVakjes.lager) {
-                    if (j.positie > gans.positie) {
+                    if (j.positie > gans.positie || plek > gans.positie) {
                         gans.gevangen = false;
+                        System.out.println(gans.getKleur() + ", iemand is je gepasseerd dus je bent vrij, de volgende ronde mag je weer gooien");
                         SpeciaalVakjes.lager.clear();
                         break;
                     }
@@ -205,8 +208,9 @@ public class Ganzenbord {
             }
             if (gans.positie == 31) {
                 for (Gans j : SpeciaalVakjes.lager2) {
-                    if (j.positie > gans.positie) {
+                    if (j.positie > gans.positie || plek > gans.positie) {
                         gans.gevallen = false;
+                        System.out.println(gans.getKleur() + ", iemand is je gepasseerd dus je bent vrij, de volgende ronde mag je weer gooien");
                         SpeciaalVakjes.lager2.clear();
                         break;
                     }
@@ -279,6 +283,9 @@ class SpeciaalVakjes {
         if (!gans.terug) {
             System.out.println(gans.positie + ", een gans, ga nogmaals het aantal gegooide ogen verder");
             int plek = gans.positie + dobbel1 + dobbel2;
+            if(SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)){
+                Ganzenbord.gevangenisOfPut(plek);
+            }
             if (plek > 63) {
                 Ganzenbord.teHoog(gans, dobbel1, dobbel2);
             } else {
@@ -288,6 +295,9 @@ class SpeciaalVakjes {
         } else {
             System.out.println(gans.positie + ", een gans, ga nogmaals het aantal gegooide ogen terug");
             int plek = gans.positie - dobbel1 - dobbel2;
+            if(SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)){
+                Ganzenbord.gevangenisOfPut(plek);
+            }
             if (Ganzenbord.nietBezet(gans, plek)) {
                 gans.positie -= (dobbel1 + dobbel2);
                 Vakjes.uitvoeren(gans, dobbel1, dobbel2);
