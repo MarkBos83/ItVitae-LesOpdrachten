@@ -1,17 +1,23 @@
 import java.util.*;
 
 public class Ganzenbord {
-    static ArrayList<Gans> ganzen = new ArrayList<>();
-    static Scanner scanner = new Scanner(System.in);
-    static Dobbelsteen dob1 = new Dobbelsteen();
-    static Dobbelsteen dob2 = new Dobbelsteen();
-    static int aantalspelers;
-
     public static void main(String[] args) {
+        new Spel().start();
+    }
+}
+
+class Spel {
+    static ArrayList<Gans> ganzen = new ArrayList<>();
+    Scanner scanner = new Scanner(System.in);
+    Dobbelsteen dob1 = new Dobbelsteen();
+    Dobbelsteen dob2 = new Dobbelsteen();
+    int aantalspelers;
+
+    void start() {
         spelersmaken();
         beginnen(ganzen);
 
-        spel:
+        boolean spelAf = false;
         do {
             for (int i = 0; i < aantalspelers; i++) {
                 if (!ganzen.get(i).beurtOverslaan && !ganzen.get(i).gevangen && !ganzen.get(i).gevallen) {
@@ -21,68 +27,18 @@ public class Ganzenbord {
                     ganzen.get(i).beurtOverslaan = false;
                 }
                 if (ganzen.get(i).gewonnen) {
-                    break spel;
+                    spelAf = true;
+                    break;
                 }
             }
-        } while (true);
+        } while (!spelAf);
     }
 
-    /*
-    laat alle spelers 1 keer gooien met 1 dobbelsteen, wie het hoogst gooid mag beginnen, als meer dan 2 mensen
-    hetzelfde gooien, gooid iedereen opnieuw, als 2 mensen hetzelfde gooien, gooien alleen die 2 opnieuw.
-    verder gaan de beurten gewoon met de klok mee (in welke volgorde ze zijn ingevuld).
-    */
-    static void beginnen(ArrayList<Gans> ganzen) {
-        ArrayList<Integer> hoogstGegooid = new ArrayList<>();
-        ArrayList<Gans> hoogstGegooideGans = new ArrayList<>();
-        ArrayList<Gans> hoogstGegooideGans2 = new ArrayList<>();
-        System.out.println("wie het hoogste gooit begint, als meer dan 2 spelers hetzelfde gooid, gooid iedereen opnieuw. bij 2 spelers, alleen die 2.");
+    void beginnen(ArrayList<Gans> ganz) {
         do {
-            if (hoogstGegooideGans.size() == 4) {
-                hoogstGegooideGans.clear();
-                hoogstGegooid.clear();
-            }
-            for (int i = 0; i < aantalspelers; i++) {
-                System.out.print(ganzen.get(i).getKleur() + ", druk op enter om 1 dobbelsteen te gooien");
-                scanner.nextLine();
-                int dobbel1 = dob1.Gooien();
-                hoogstGegooid.add(dobbel1);
-                System.out.println("Je hebt " + dobbel1 + " gegooid\n");
-            }
-            for (int i = 0; i < hoogstGegooid.size(); i++) {
-                if (Objects.equals(hoogstGegooid.get(i), Collections.max(hoogstGegooid))) {
-                    hoogstGegooideGans.add(ganzen.get(i));
-                }
-            }
-        } while (hoogstGegooideGans.size() > 2);
-        hoogstGegooid.clear();
-        do {
-            if (hoogstGegooideGans.size() == 1) {
-                hoogstGegooideGans2.add(hoogstGegooideGans.get(0));
-                System.out.println(hoogstGegooideGans2.get(0).getKleur() + " mag beginnen.");
-                break;
-            } else {
-                for (Gans hoog : hoogstGegooideGans) {
-                    System.out.print(hoog.getKleur() + ", druk op enter om 1 dobbelsteen te gooien");
-                    scanner.nextLine();
-                    int dobbel1 = dob1.Gooien();
-                    hoogstGegooid.add(dobbel1);
-                    System.out.println("Je hebt " + dobbel1 + " gegooid\n");
-                }
-                for (int i = 0; i < hoogstGegooid.size(); i++) {
-                    if (Objects.equals(hoogstGegooid.get(i), Collections.max(hoogstGegooid))) {
-                        hoogstGegooideGans2.add(hoogstGegooideGans.get(i));
-                    }
-                }
-            }
-            if (hoogstGegooideGans2.size() == 1) {
-                System.out.println(hoogstGegooideGans2.get(0).getKleur() + " mag beginnen.");
-                break;
-            }
-            hoogstGegooideGans2.clear();
-            hoogstGegooid.clear();
-        } while (true);
-        switch (ganzen.indexOf(hoogstGegooideGans2.get(0))) {
+            ganz = hoogstgegooid(ganz);
+        } while (ganz.size() != 1);
+        switch (Spel.ganzen.indexOf(ganz.get(0))) {
             case 0:
                 beurt(ganzen.get(0));
             case 1:
@@ -106,15 +62,38 @@ public class Ganzenbord {
         }
     }
 
+    private ArrayList<Gans> hoogstgegooid(ArrayList<Gans> ganzen) {
+        int hoogste = 0;
+        ArrayList<Gans> hoogsteGanzen = new ArrayList<>();
+
+        for (Gans gans : ganzen) {
+            System.out.print(gans.getKleur() + ", druk op enter om 1 dobbelsteen te gooien");
+            scanner.nextLine();
+            int dobbel1 = dob1.Gooien();
+            System.out.println("Je hebt " + dobbel1 + " gegooid\n");
+            if (dobbel1 > hoogste) {
+                hoogsteGanzen.clear();
+                hoogste = dobbel1;
+                hoogsteGanzen.add(gans);
+            } else if (dobbel1 == hoogste) {
+                hoogsteGanzen.add(gans);
+            }
+        }
+        if (hoogsteGanzen.size() > 1) {
+            System.out.println("meerdere spelers hebben het hoogst gegooid, die spelers gooien nu opnieuw.");
+        }
+        return hoogsteGanzen;
+    }
+
     /*
     vraagt om het aantal spelers en de namen/kleuren en maakt die aan.
     */
-    static void spelersmaken() {
+    void spelersmaken() {
         do {
             System.out.print("Met Hoeveel Spelers wil je spelen (tussen 2 en 6): ");
             aantalspelers = scanner.nextInt();
             scanner.nextLine();
-        } while (!(aantalspelers < 7 && aantalspelers > 1));
+        } while (aantalspelers < 2 || aantalspelers > 6);
         System.out.println("Vul de kleuren van de spelers in (zwart, wit, groen, rood, blauw, geel): ");
         for (int x = 0; x < aantalspelers; x++) {
             String kleur = scanner.nextLine();
@@ -126,7 +105,7 @@ public class Ganzenbord {
     geeft aan wiens beurt het is, en die mag dan op enter drukken om zijn dobbelstenen te werpen, dan roept deze methode
     alle benodigde andere methodes aan om de hele beurt af te maken.
      */
-    static void beurt(Gans gans) {
+    void beurt(Gans gans) {
         if (gans.terug) {
             gans.terug = false;
         }
@@ -137,8 +116,10 @@ public class Ganzenbord {
         int dobbel2 = dob2.Gooien();
         int gedobbeld = dobbel1 + dobbel2;
         int plek = gans.positie + dobbel1 + dobbel2;
-        if(SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)){
-            gevangenisOfPut(plek);
+        if (plek > 31) {
+            if (SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)) {
+                gevangenisOfPut2(plek, gans);
+            }
         }
         System.out.println("Je hebt " + dobbel1 + " en " + dobbel2 + " gegooid (samen " + gedobbeld + ")");
         if (plek > 63) {
@@ -182,7 +163,7 @@ public class Ganzenbord {
                     continue;
                 }
                 bezet = true;
-                System.out.println("Dit vakje is al bezet, je word niet verplaatst");
+                System.out.println("Dit vakje is al bezet, je gaat terug naar je oude plek");
                 gans.positie = gans.oudePositie;
                 break;
             }
@@ -194,26 +175,21 @@ public class Ganzenbord {
     als iemand in de gevangenis of put zit, word met deze methode gecheckt of die speler er al uit mag of niet
     (of hij al is gepasseerd)
      */
-    static void gevangenisOfPut(int plek) {
-        for (Gans gans : ganzen) {
-            if (gans.positie == 52) {
-                for (Gans j : SpeciaalVakjes.lager) {
-                    if (j.positie > gans.positie || plek > gans.positie) {
-                        gans.gevangen = false;
-                        System.out.println(gans.getKleur() + ", iemand is je gepasseerd dus je bent vrij, de volgende ronde mag je weer gooien");
-                        SpeciaalVakjes.lager.clear();
-                        break;
-                    }
+    static void gevangenisOfPut2(int plek, Gans gans) {
+        for (Gans gans1 : ganzen) {
+            if (gans1.positie == 52) {
+                if (plek > 52) {
+                    gans1.gevangen = false;
+                    System.out.println(gans.getKleur() + ", iemand heeft je gepasseerd, de volgende ronde mag je weer gooien");
+                    SpeciaalVakjes.lager.clear();
+                    break;
                 }
-            }
-            if (gans.positie == 31) {
-                for (Gans j : SpeciaalVakjes.lager2) {
-                    if (j.positie > gans.positie || plek > gans.positie) {
-                        gans.gevallen = false;
-                        System.out.println(gans.getKleur() + ", iemand is je gepasseerd dus je bent vrij, de volgende ronde mag je weer gooien");
-                        SpeciaalVakjes.lager2.clear();
-                        break;
-                    }
+            } else if (gans1.positie == 31) {
+                if (plek > 31) {
+                    gans1.gevallen = false;
+                    System.out.println(gans1.getKleur() + ", iemand heeft je gepasseerd, de volgende ronde mag je weer gooien");
+                    SpeciaalVakjes.lager2.clear();
+                    break;
                 }
             }
         }
@@ -283,11 +259,11 @@ class SpeciaalVakjes {
         if (!gans.terug) {
             System.out.println(gans.positie + ", een gans, ga nogmaals het aantal gegooide ogen verder");
             int plek = gans.positie + dobbel1 + dobbel2;
-            if(SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)){
-                Ganzenbord.gevangenisOfPut(plek);
+            if (SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)) {
+                Spel.gevangenisOfPut2(plek, gans);
             }
             if (plek > 63) {
-                Ganzenbord.teHoog(gans, dobbel1, dobbel2);
+                Spel.teHoog(gans, dobbel1, dobbel2);
             } else {
                 gans.positie += (dobbel1 + dobbel2);
                 Vakjes.uitvoeren(gans, dobbel1, dobbel2);
@@ -295,10 +271,10 @@ class SpeciaalVakjes {
         } else {
             System.out.println(gans.positie + ", een gans, ga nogmaals het aantal gegooide ogen terug");
             int plek = gans.positie - dobbel1 - dobbel2;
-            if(SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)){
-                Ganzenbord.gevangenisOfPut(plek);
+            if (SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)) {
+                Spel.gevangenisOfPut2(plek, gans);
             }
-            if (Ganzenbord.nietBezet(gans, plek)) {
+            if (Spel.nietBezet(gans, plek)) {
                 gans.positie -= (dobbel1 + dobbel2);
                 Vakjes.uitvoeren(gans, dobbel1, dobbel2);
             }
@@ -309,7 +285,7 @@ class SpeciaalVakjes {
     void brug(Gans gans) {
         System.out.println(gans.positie + ", een brug! ga verder naar 12");
         int plek = 12;
-        if (Ganzenbord.nietBezet(gans, plek)) {
+        if (Spel.nietBezet(gans, plek)) {
             gans.positie = 12;
         }
     }
@@ -323,17 +299,10 @@ class SpeciaalVakjes {
     //zelfde als put, je zit vast tot iemand je passeerd of als je laatste staat, 1 beurt overslaan.
     void gevangenis(Gans gans) {
         System.out.println(gans.positie + ", je zit in de gevangenis, wacht tot iemand je passeert om je eruit te helpen, als je laastste staat, sla 1 beurt over.");
-        for (Gans g : Ganzenbord.ganzen) {
-            posities.add(g.positie);
-        }
-        if (gans.positie == Collections.min(posities)) {
-            gans.beurtOverslaan = true;
-        } else {
-            gans.gevangen = true;
-            for (int i = 0; i < Ganzenbord.ganzen.size(); i++) {
-                if (Ganzenbord.ganzen.get(i).positie < gans.positie) {
-                    lager.add(Ganzenbord.ganzen.get(i));
-                }
+        gevangenisOfPut(gans);
+        for (int i = 0; i < Spel.ganzen.size(); i++) {
+            if (Spel.ganzen.get(i).positie < gans.positie) {
+                lager.add(Spel.ganzen.get(i));
             }
         }
         posities.clear();
@@ -342,27 +311,33 @@ class SpeciaalVakjes {
     //zelfde als gevangenis, je zit vast tot iemand je passeerd of als je laatste staat, 1 beurt overslaan.
     void put(Gans gans) {
         System.out.println(gans.positie + ", je bent in de put gevallen, wacht tot iemand je passeert om je eruit te helpen, als je laastste staat, sla 1 beurt over.");
-        for (Gans g : Ganzenbord.ganzen) {
+        gevangenisOfPut(gans);
+        for (int i = 0; i < Spel.ganzen.size(); i++) {
+            if (Spel.ganzen.get(i).positie < gans.positie) {
+                lager2.add(Spel.ganzen.get(i));
+            }
+        }
+        posities.clear();
+    }
+
+    void gevangenisOfPut(Gans gans) {
+        for (Gans g : Spel.ganzen) {
             posities.add(g.positie);
         }
         if (gans.positie == Collections.min(posities)) {
             gans.beurtOverslaan = true;
-        } else {
+        } else if (gans.positie == 31) {
             gans.gevallen = true;
-            for (int i = 0; i < Ganzenbord.ganzen.size(); i++) {
-                if (Ganzenbord.ganzen.get(i).positie < gans.positie) {
-                    lager2.add(Ganzenbord.ganzen.get(i));
-                }
-            }
+        } else {
+            gans.gevangen = true;
         }
-        posities.clear();
     }
 
     //terug naar 37
     void doornstruik(Gans gans) {
         System.out.println(gans.positie + ", AAAAHH!! doornstruik! ga terug naar 37");
         int plek = 37;
-        if (Ganzenbord.nietBezet(gans, plek)) {
+        if (Spel.nietBezet(gans, plek)) {
             gans.positie = 37;
         }
     }
@@ -378,13 +353,13 @@ class SpeciaalVakjes {
         if (gans.eerstebeurt) {
             if (dobbel1 == 5 && dobbel2 == 4 || dobbel1 == 4 && dobbel2 == 5) {
                 int plek = 53;
-                if (Ganzenbord.nietBezet(gans, plek)) {
+                if (Spel.nietBezet(gans, plek)) {
                     System.out.println("je hebt 5 en 4 gegooid, je mag direct door naar 53");
                     gans.positie = 53;
                 }
             } else if (dobbel1 == 6 && dobbel2 == 3 || dobbel1 == 3 && dobbel2 == 6) {
                 int plek = 26;
-                if (Ganzenbord.nietBezet(gans, plek)) {
+                if (Spel.nietBezet(gans, plek)) {
                     System.out.println("je hebt 6 en 3 gegooid, je mag direct door naar 26");
                     gans.positie = 26;
                 }
@@ -401,3 +376,4 @@ class SpeciaalVakjes {
         gans.gewonnen = true;
     }
 }
+
