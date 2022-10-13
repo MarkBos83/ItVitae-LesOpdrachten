@@ -377,11 +377,13 @@ class SpeciaalVakjes {
             if (dobbel1 == 5 && dobbel2 == 4 || dobbel1 == 4 && dobbel2 == 5) {
                 int plek = 53;
                 if (!Ganzenbord.bezet(gans, plek)) {
+                    System.out.println("je hebt 5 en 4 gegooid, je mag direct door naar 53");
                     gans.positie = 53;
                 }
             } else if (dobbel1 == 6 && dobbel2 == 3 || dobbel1 == 3 && dobbel2 == 6) {
                 int plek = 26;
                 if (!Ganzenbord.bezet(gans, plek)) {
+                    System.out.println("je hebt 6 en 3 gegooid, je mag direct door naar 226");
                     gans.positie = 26;
                 }
             }
