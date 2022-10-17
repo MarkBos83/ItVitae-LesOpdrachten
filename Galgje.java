@@ -6,7 +6,7 @@ public class Galgje {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Geef een galgjewoord: ");
-        String woord = scanner.nextLine();
+        String woord = scanner.nextLine().toLowerCase();
         int levens = 10;
         List<Character> chars = new ArrayList<>();
         List<Character> gegokteLetters = new ArrayList<>();
@@ -25,7 +25,7 @@ public class Galgje {
         System.out.println();
         do {
             System.out.println("Raad een letter of het woord: ");
-            String raad = scanner.nextLine();
+            String raad = scanner.nextLine().toLowerCase();
             if(raad.equals(woord)){
                 System.out.println("U WIN");
                 break;

@@ -21,7 +21,7 @@ class Spel {
         do {
             for (int i = 0; i < aantalspelers; i++) {
                 if (!ganzen.get(i).beurtOverslaan && !ganzen.get(i).gevangen && !ganzen.get(i).gevallen) {
-                    beurt(ganzen.get(i));
+                    ganzen.get(i).beurt(ganzen.get(i), scanner, dob1, dob2);
                 } else {
                     System.out.println("\n" + ganzen.get(i).getKleur() + " moet deze beurt overslaan\n");
                     ganzen.get(i).beurtOverslaan = false;
@@ -40,24 +40,24 @@ class Spel {
         } while (ganz.size() != 1);
         switch (Spel.ganzen.indexOf(ganz.get(0))) {
             case 0:
-                beurt(ganzen.get(0));
+                ganzen.get(0).beurt(ganzen.get(0), scanner, dob1, dob2);
             case 1:
-                beurt(ganzen.get(1));
+                ganzen.get(1).beurt(ganzen.get(1), scanner, dob1, dob2);
             case 2:
                 if (aantalspelers > 2) {
-                    beurt(ganzen.get(2));
+                    ganzen.get(2).beurt(ganzen.get(2), scanner, dob1, dob2);
                 }
             case 3:
                 if (aantalspelers > 3) {
-                    beurt(ganzen.get(3));
+                    ganzen.get(3).beurt(ganzen.get(3), scanner, dob1, dob2);
                 }
             case 4:
                 if (aantalspelers > 4) {
-                    beurt(ganzen.get(4));
+                    ganzen.get(4).beurt(ganzen.get(4), scanner, dob1, dob2);
                 }
             case 5:
                 if (aantalspelers > 5) {
-                    beurt(ganzen.get(5));
+                    ganzen.get(5).beurt(ganzen.get(5), scanner, dob1, dob2);
                 }
         }
     }
@@ -94,9 +94,23 @@ class Spel {
             aantalspelers = scanner.nextInt();
             scanner.nextLine();
         } while (aantalspelers < 2 || aantalspelers > 6);
-        System.out.println("Vul de kleuren van de spelers in (zwart, wit, groen, rood, blauw, geel): ");
+        System.out.println("Vul de kleuren of namen van de spelers in: ");
         for (int x = 0; x < aantalspelers; x++) {
-            String kleur = scanner.nextLine();
+            String kleur;
+            boolean dubbel;
+            do {
+                dubbel = false;
+                kleur = scanner.nextLine();
+                for (Gans g : ganzen) {
+                    if (g.getKleur().equalsIgnoreCase(kleur)) {
+                        dubbel = true;
+                        break;
+                    }
+                }
+                if (dubbel) {
+                    System.out.println("die kleur/naam is al in gebruik, kies een andere: ");
+                }
+            } while (dubbel);
             ganzen.add(x, new Gans(kleur));
         }
     }
@@ -105,38 +119,7 @@ class Spel {
     geeft aan wiens beurt het is, en die mag dan op enter drukken om zijn dobbelstenen te werpen, dan roept deze methode
     alle benodigde andere methodes aan om de hele beurt af te maken.
      */
-    void beurt(Gans gans) {
-        if (gans.terug) {
-            gans.terug = false;
-        }
-        System.out.print(gans.getKleur() + "'s beurt, druk op enter om de dobbelstenen te werpen.");
-        scanner.nextLine();
-        gans.oudePositie = gans.positie;
-        int dobbel1 = dob1.Gooien();
-        int dobbel2 = dob2.Gooien();
-        int gedobbeld = dobbel1 + dobbel2;
-        int plek = gans.positie + dobbel1 + dobbel2;
-        if (plek > 31) {
-            if (SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)) {
-                gevangenisOfPut2(plek, gans);
-            }
-        }
-        System.out.println("Je hebt " + dobbel1 + " en " + dobbel2 + " gegooid (samen " + gedobbeld + ")");
-        if (plek > 63) {
-            teHoog(gans, dobbel1, dobbel2);
-        } else {
-            if (nietBezet(gans, plek)) {
-                gans.positie += gedobbeld;
-                Vakjes.uitvoeren(gans, dobbel1, dobbel2);
-            }
-        }
-        if (!gans.gewonnen) {
-            System.out.println("de positie van " + gans.getKleur() + " is nu " + gans.positie + "\n");
-        }
-        if (gans.eerstebeurt) {
-            gans.eerstebeurt = false;
-        }
-    }
+
 
     /*
     als de speler iets heeft gegooid waardoor zijn positie boven de 63 uitkomt, word er met deze methode uitgerekend waar
@@ -224,6 +207,39 @@ class Gans {
 
     String getKleur() {
         return kleur;
+    }
+
+    void beurt(Gans gans, Scanner scanner, Dobbelsteen dob1, Dobbelsteen dob2) {
+        if (gans.terug) {
+            gans.terug = false;
+        }
+        System.out.print(gans.getKleur() + "'s beurt, druk op enter om de dobbelstenen te werpen.");
+        scanner.nextLine();
+        gans.oudePositie = gans.positie;
+        int dobbel1 = dob1.Gooien();
+        int dobbel2 = dob2.Gooien();
+        int gedobbeld = dobbel1 + dobbel2;
+        int plek = gans.positie + dobbel1 + dobbel2;
+        if (plek > 31) {
+            if (SpeciaalVakjes.lager.contains(gans) || SpeciaalVakjes.lager2.contains(gans)) {
+                Spel.gevangenisOfPut2(plek, gans);
+            }
+        }
+        System.out.println("Je hebt " + dobbel1 + " en " + dobbel2 + " gegooid (samen " + gedobbeld + ")");
+        if (plek > 63) {
+            Spel.teHoog(gans, dobbel1, dobbel2);
+        } else {
+            if (Spel.nietBezet(gans, plek)) {
+                gans.positie += gedobbeld;
+                Vakjes.uitvoeren(gans, dobbel1, dobbel2);
+            }
+        }
+        if (!gans.gewonnen) {
+            System.out.println("de positie van " + gans.getKleur() + " is nu " + gans.positie + "\n");
+        }
+        if (gans.eerstebeurt) {
+            gans.eerstebeurt = false;
+        }
     }
 }
 
